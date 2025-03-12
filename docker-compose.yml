@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: certylex_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: certylex_db
+    ports:
+      - "5454:5454"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
