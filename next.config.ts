@@ -5,8 +5,14 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/flask/:path*",
-        destination: "https://localhost:5000/:path*",
+        // Rewrite for Next.js API routes (under app/api)
+        source: "/app/api/:path*",
+        destination: "https://localhost:3000/api/:path*",
+      },
+      {
+        // Rewrite for FastAPI backend routes (under backend/api)
+        source: "/backend/api/:path*",
+        destination: "https://localhost:5328/api/:path*",
       },
     ]
   }

@@ -1,12 +1,13 @@
 {
-  "name": "certylex-agent",
+  "name": "certylex",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "python:backend": "uvicorn backend.api.main:app --reload --port 5328"
   },
   "dependencies": {
     "next": "15.2.2",
