@@ -8,8 +8,8 @@ This project consists of a **Next.js full-stack** and a **Python FastAPI backend
 
 ## Prerequisites
 
-- **Node.js** (v18 or higher)
-- **Python** (v3.9 or higher)
+- **Node.js** (v22 or higher)
+- **Python** (v3.11 or higher)
 - **Poetry** (for Python dependency management)
 
 ---
@@ -58,6 +58,12 @@ This project consists of a **Next.js full-stack** and a **Python FastAPI backend
    poetry run uvicorn backend.api.main:app --reload --port 5328
    ```
 
+   or
+
+   ```bash
+   npm run python:backend
+   ```
+
    The backend will be available at [http://localhost:5328](http://localhost:5328).
 
 ---
@@ -68,6 +74,12 @@ This project consists of a **Next.js full-stack** and a **Python FastAPI backend
 
    ```bash
    poetry run uvicorn backend.api.main:app --reload --port 5328
+   ```
+
+   or
+
+   ```bash
+   npm run python:backend
    ```
 
 2. Start the frontend server:
