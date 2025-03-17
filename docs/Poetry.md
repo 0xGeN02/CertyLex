@@ -6,7 +6,7 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
 
 ## Prerequisites
 
-- Python 3.13 (for this repo)
+- Python 3.11 (for this repo)
 - Poetry installed on your system. If not installed, follow the [Poetry installation guide](https://python-poetry.org/docs/#installation).
 
 ## Setup Instructions
