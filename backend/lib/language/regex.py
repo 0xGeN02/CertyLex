@@ -10,11 +10,15 @@ def name_detector(text: str) -> List[str]:
     """
     Detect names in a text
     """
+    mayus = r"[A-ZÁÉÍÓÚÑ]"
+    minus = r"[a-záéíóúñ]"
+    deter = r"(?:del|de|la|los)"
+
     # Name / Surname regex pattern
-    pattern = re.compile(
-        r"(?:(?:[A-ZÁÉÍÓÚÑ](?:[a-záéíóúñ]+|ª)|(?:del|de|la|los))(?:-[A-ZÁÉÍÓÚÑ](?:[a-záéíóúñ]+|ª))?\s+)+"
-        r"(?:[A-ZÁÉÍÓÚÑ](?:[a-záéíóúñ]+|ª)(?:-[A-ZÁÉÍÓÚÑ](?:[a-záéíóúñ]+|ª))?)"
+    name_pattern = re.compile(
+        rf"(?:(?:{mayus}(?:{minus}+|ª)|{deter})(?:-{mayus}(?:{minus}+|ª))?\s+)+"
+        rf"(?:{mayus}(?:{minus}+|ª)(?:-{mayus}(?:{minus}+|ª))?)"
     )
-    matches: List[Any] = pattern.findall(text)
+    matches: List[Any] = name_pattern.findall(text)
     names: List[str] = [m.strip() for m in matches if m.strip()]
     return names
