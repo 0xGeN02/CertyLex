@@ -2,10 +2,10 @@
 Main file for the FastAPI application
 """
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from fastapi.responses import FileResponse
+from .middleware import app
 
-app = FastAPI()
 API_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 FAVICON_PATH = os.path.join(API_ROOT_DIR, "favicon.ico")
 

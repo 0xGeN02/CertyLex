@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       {
         // Rewrite for FastAPI backend routes (under backend/api)
         source: "/backend/api/:path*",
-        destination: "https://localhost:5328/api/:path*",
+        destination: "http://localhost:5328/api/:path*", // For HTTPS SSL is required
       },
     ]
   }
