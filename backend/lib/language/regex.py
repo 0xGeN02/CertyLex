@@ -3,19 +3,9 @@
 This file contains the regex patterns for the language module and pocessing data
 """
 
-import re
-from typing import List, Tuple, NewType
+from typing import List
 from lib.language.text_normalizer import normalize_text
-
-ESPNamePattern = NewType("ESPNamePattern", re.Match)
-MAYUS = r"[A-ZÁÉÍÓÚÑ]"
-MINUS = r"[a-záéíóúñ]"
-DETER = r"(?:del|de|la|los)"
-NAME = rf"{MAYUS}(?:{MINUS}+|ª)"
-NOMBRE_COMPUESTO = rf"{NAME}(?:-{NAME})?"
-SPANISH_NAME_PATTERN : ESPNamePattern = re.compile(
-    rf"(?:(?:{NAME}|{DETER})(?:-{NAME})?\s+)+(?:{NOMBRE_COMPUESTO})"
-)
+from lib.language.types.regex import ESPNamePattern, SPANISH_NAME_PATTERN, DNIRegexPattern, DNIFormat, DEFAULT_DNI_FORMAT, DNI_PATTERN
 
 def name_detector(
     text: str,
@@ -28,17 +18,6 @@ def name_detector(
     matches: List[ESPNamePattern] = spanish_name_pattern.findall(text)
     names: List[ESPNamePattern] = [m.strip() for m in matches if m.strip()] # Remove empty strings
     return names
-
-DNIFormat = Tuple[bool, bool]
-UPPERCASE: bool = True # Normalize letter to uppercase as default
-HYPHEN: bool = False # No space between digits and letter as default
-DEFAULT_DNI_FORMAT: DNIFormat = (HYPHEN, UPPERCASE)
-
-DNIRegexPattern = NewType("DNIRegexPattern", re.Pattern)
-DNI_DIGITS = r"\d{8}"
-DNI_LETTER = r"[A-HJ-NP-TV-Za-hj-np-tv-z]"  # Excluding I, Ñ, O, U
-DNI_SEPARATOR = r"(?:-?\s*)"  # Optional hyphen and/or spaces between digits and letter
-DNI_PATTERN : DNIRegexPattern = re.compile(rf"({DNI_DIGITS})({DNI_SEPARATOR})({DNI_LETTER})")
 
 def dni_detector(
     text: str,
