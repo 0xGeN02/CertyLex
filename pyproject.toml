@@ -11,6 +11,9 @@ python = "^3.11"
 fastapi = "^0.115.11"
 uvicorn = "^0.34.0"
 python-dotenv = "^1.0.1"
+numpy = "^2.2.4"
+matplotlib = "^3.10.1"
+ipykernel = "^6.29.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
