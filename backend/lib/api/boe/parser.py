@@ -4,6 +4,7 @@ Módulo para descargar el sumario del BOE en formato JSON.
 
 import os
 import json
+from datetime import datetime, timedelta
 import requests
 
 # Función auxiliar para descargar un documento dado su URL y extensión
@@ -113,7 +114,35 @@ def download_boe_documentos(json_filepath: str):
                                 print(f"No se encontró URL XML ni HTML para {identificador}")
 
 
+def procesar_rango_fechas(start_date: str, end_date: str, base_path: str):
+    """
+    Procesa todos los archivos JSON en un rango de fechas y ejecuta la función download_boe_documentos.
+    
+    Parámetros:
+        start_date (str): Fecha de inicio en formato YYYYMMDD.
+        end_date (str): Fecha de fin en formato YYYYMMDD.
+        base_path (str): Ruta base donde se encuentran los archivos JSON.
+    """
+    current_date = datetime.strptime(start_date, "%Y%m%d")
+    end_date = datetime.strptime(end_date, "%Y%m%d")
+
+    while current_date <= end_date:
+        fecha_str = current_date.strftime("%Y%m%d")
+        json_filepath = os.path.join(base_path, fecha_str[:4], f"BOE_sumario_{fecha_str}.json")
+
+        if os.path.exists(json_filepath):
+            print(f"Procesando archivo: {json_filepath}")
+            download_boe_documentos(json_filepath)
+        else:
+            print(f"Archivo no encontrado: {json_filepath}")
+
+        current_date += timedelta(days=1)
+
 if __name__ == "__main__":
-    # Ejemplo de uso: procesar un archivo JSON concreto
-    JSON_FILE = "./backend/data/boe/sumario/2015/BOE_sumario_20150101.json"
-    download_boe_documentos(JSON_FILE)
+    # Ruta base donde se encuentran los archivos JSON
+    BASE_PATH = "./backend/data/boe/sumario/"
+    # Rango de fechas
+    START_DATE = "20140101"
+    END_DATE = "20250322"
+
+    procesar_rango_fechas(START_DATE, END_DATE, BASE_PATH)
