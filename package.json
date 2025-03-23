@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "python:backend": "uvicorn backend.api.main:app --reload --port 5328",
-    "python:test": "poetry run pytest -vvv"
+    "python:test": "poetry run pytest -vvv",
+    "python:run:boe": "poetry run python backend/data/api/boe.py"
   },
   "dependencies": {
     "next": "15.2.2",

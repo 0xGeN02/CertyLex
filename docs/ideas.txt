@@ -1,0 +1,8 @@
+- Array.nombres match nombres doc
+- Dentro del doc nombre siempre escrito igual (acento no acento)
+- Par Persona-ID (DNI bien escrito y mismo cantidad de nombres y dni)
+- Fechas (fecha de firma no puede ser posterior a la fecha que se va a firmar ejemplo contrato alquiler que vigencia sea anteriror a fecha de firma)
+- Clasificador de tpo de docuemnto (alquiler, albaranes, contrato de compraventa, judicial...)
+- Deteccion de imagen dentor de documento y correspondencia con respecto a lo tratado 
+- Crear un modelo descriptor de la imagen a texto
+

@@ -3,13 +3,11 @@
 This file contains the regex patterns for the language module and pocessing data
 """
 
-import re
 from typing import List
 from lib.language.text_normalizer import normalize_text, encode_spanish
 from lib.language.types.regex import (ESPNameRegexPattern, SPANISH_NAME_PATTERN,
                                       NIFRegexPattern, NIFFormat, DEFAULT_NIF_FORMAT, 
                                       NIF_PATTERN, NIF_EMPRESA_PATTERN, NIFEmpresaRegexPattern)
-from lib.math.calculus import digit_sum
 
 def name_detector(
     text: str,
