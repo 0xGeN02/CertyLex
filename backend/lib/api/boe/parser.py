@@ -20,8 +20,8 @@ def descargar_documento(url: str , ext: str, output_dir: str, identificador: str
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         # Se guarda el contenido en modo binario
-        filename = os.path.join(output_dir, f"{identificador}_{ext}.{ext}")
-        with open(filename, "wb") as f:
+        filename = os.path.join(output_dir, f"{identificador}.{ext}")
+        with open(filename, "wb") as f: # Binary write (wb) does not require encoding
             f.write(response.content)
         print(f"Descargado {ext.upper()} para {identificador}: {filename}")
     except requests.exceptions.HTTPError as e:
@@ -31,7 +31,7 @@ def descargar_documento(url: str , ext: str, output_dir: str, identificador: str
     except requests.exceptions.RequestException as e:
         print(f"Error en la solicitud de {url}: {e}")
 
-def download_boe_documentos(json_filepath: str, fecha_publicacion: str):
+def download_boe_documentos(json_filepath: str):
     """
     Lee el archivo JSON del sumario del BOE, extrae los documentos referenciados 
     y los descarga en la carpeta de salida organizada por año y fecha.
@@ -42,11 +42,13 @@ def download_boe_documentos(json_filepath: str, fecha_publicacion: str):
       json_filepath (str): Ruta completa al archivo JSON del sumario.
       output_base_dir (str): Carpeta base donde se guardarán los documentos descargados.
     """
+    # Fecha de publicación (por ejemplo, "20150101")
+    fecha_publicacion = json_filepath.rsplit("_", maxsplit=-1)[-1].replace(".json", "")
+
     # ./backend/data/boe/diario
-    output_base_dir ="../../../data/boe/diario"
+    output_base_dir ="./backend/data/boe/diario"
     # Crear el directorio de salida: output_base_dir/{year}/{fecha_publicacion}/
     output_dir = os.path.join(output_base_dir, fecha_publicacion[:4], fecha_publicacion)
-
     os.makedirs(output_dir, exist_ok=True)
     print(f"Creando directorio de salida: {output_dir}")
 
@@ -98,17 +100,20 @@ def download_boe_documentos(json_filepath: str, fecha_publicacion: str):
                             # Descargar documento en formato HTML
                             url_html = item.get("url_html")
                             if url_html:
-                                descargar_documento(url_html, "html", output_dir, identificador)
+                                html_output_dir = os.path.join(output_dir, "html")
+                                os.makedirs(html_output_dir, exist_ok=True)
+                                descargar_documento(url_html, "html", html_output_dir, identificador)
                             # Descargar documento en formato XML
                             url_xml = item.get("url_xml")
                             if url_xml:
-                                descargar_documento(url_xml, "xml", output_dir, identificador)
+                                xml_output_dir = os.path.join(output_dir, "xml")
+                                os.makedirs(xml_output_dir, exist_ok=True)
+                                descargar_documento(url_xml, "xml", xml_output_dir, identificador)
                             else:
                                 print(f"No se encontró URL XML ni HTML para {identificador}")
 
 
 if __name__ == "__main__":
     # Ejemplo de uso: procesar un archivo JSON concreto
-    JSON_FILE = "../../../data/boe/sumario/2015/BOE_sumario_20150101.json"
-    FECHA_PUBLICACION = JSON_FILE.rsplit("_", maxsplit="-1")[-1]
-    download_boe_documentos(JSON_FILE, FECHA_PUBLICACION)
+    JSON_FILE = "./backend/data/boe/sumario/2015/BOE_sumario_20150101.json"
+    download_boe_documentos(JSON_FILE)

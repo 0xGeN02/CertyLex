@@ -4,11 +4,12 @@ API para obtener el sumario del BOE en formato JSON
 
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
+from api.routers.boe.route import router
 from backend.lib.api.boe import download_boe_sumario
 
 app = FastAPI()
 
-@app.get("/boe/{fecha}")
+@router.get("/sumario/{fecha}")
 async def get_boe_sumario(fecha: str):
     """
     Endpoint para obtener el sumario del BOE en formato JSON para una fecha específica.
@@ -26,7 +27,7 @@ async def get_boe_sumario(fecha: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al procesar la solicitud: {e}") from e
 
-@app.get("/boe/{start_date}::{end_date}")
+@app.get("/sumario/range/{start_date}/{end_date}")
 async def get_boe_sumario_range(start_date: str, end_date: str):
     """
     Endpoint para obtener el sumario del BOE en formato JSON para un rango de fechas.

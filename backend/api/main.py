@@ -7,14 +7,14 @@ from fastapi.responses import FileResponse
 from .middleware import app
 
 API_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-FAVICON_PATH = os.path.join(API_ROOT_DIR, "favicon.ico")
+FAVICON_PATH = os.path.join(API_ROOT_DIR, "static/favicon.ico")
 
 @app.get("/")
 async def home():
     """
     Home page of the API
     """
-    return {"message": "Hello, FastAPI!"}
+    return {"message": "Hello, from FastAPI HomePage!"}
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():

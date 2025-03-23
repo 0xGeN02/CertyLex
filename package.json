@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "python:backend": "uvicorn backend.api.main:app --reload --port 5328",
+    "python:backend": "poetry run uvicorn backend.api.main:app --reload --port 5328",
     "python:test": "poetry run pytest -vvv",
     "python:run:boe": "poetry run python backend/data/api/boe.py"
   },
