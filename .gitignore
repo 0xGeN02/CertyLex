@@ -48,3 +48,6 @@ __pycache__/
 
 # data
 /backend/data
+
+# samples
+/backend/samples/data/output

@@ -8,9 +8,10 @@ This project consists of a **Next.js full-stack** and a **Python FastAPI backend
 
 ## Prerequisites
 
-- **Node.js** (v22 or higher)
-- **Python** (v3.11 or higher)
-- **Poetry** (for Python dependency management)
+- **Node.js** (v22.x.x)
+- **npm** (v11.x.x)
+- **Python** (v3.13.x)
+- **poetry** (@latest)
 
 ---
 
