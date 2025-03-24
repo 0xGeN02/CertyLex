@@ -6,7 +6,7 @@ flowchart LR
     B --> C[Preprocessing & LLM Fine-Tuning]
     C --> D[Neural Networks & ML Models]
     D --> E[Analysis & Error Detection]
-    E --> F[Legal Data Integration (BOE, EU)]
+    E --> F[Legal Data Integration: BOE and EU]
     F --> G[Enhanced Recommendations Returned to Frontend]
 ```
 
