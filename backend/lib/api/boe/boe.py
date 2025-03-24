@@ -53,8 +53,8 @@ def download_boe_sumario(fecha: str) -> bool:
 if __name__ == "__main__":
     import datetime
 
-    start_date = datetime.date(2014, 1, 1)
-    end_date = datetime.date(2014, 12, 31)
+    start_date = datetime.date(2010, 1, 1)
+    end_date = datetime.date(2013, 12, 31)
     delta = datetime.timedelta(days=1)
 
     current = start_date

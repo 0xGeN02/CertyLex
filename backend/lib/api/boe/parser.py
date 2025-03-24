@@ -98,12 +98,12 @@ def download_boe_documentos(json_filepath: str):
                         for item in items:
                             identificador = item.get("identificador", "sin_id")
 
-                            # Descargar documento en formato HTML
-                            url_html = item.get("url_html")
-                            if url_html:
-                                html_output_dir = os.path.join(output_dir, "html")
-                                os.makedirs(html_output_dir, exist_ok=True)
-                                descargar_documento(url_html, "html", html_output_dir, identificador)
+                            # Descargar documento en formato HTML (deprecate to use XML form NLP and Machine Learning)
+                            # url_html = item.get("url_html")
+                            # if url_html:
+                            #     html_output_dir = os.path.join(output_dir, "html")
+                            #     os.makedirs(html_output_dir, exist_ok=True)
+                            #     descargar_documento(url_html, "html", html_output_dir, identificador)
                             # Descargar documento en formato XML
                             url_xml = item.get("url_xml")
                             if url_xml:
