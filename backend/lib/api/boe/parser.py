@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # Ruta base donde se encuentran los archivos JSON
     BASE_PATH = "./backend/data/boe/sumario/"
     # Rango de fechas
-    START_DATE = "20140101"
+    START_DATE = "20100101"
     END_DATE = "20250322"
 
     procesar_rango_fechas(START_DATE, END_DATE, BASE_PATH)
