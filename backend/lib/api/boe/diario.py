@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import requests
 
 # Función auxiliar para descargar un documento dado su URL y extensión
-def descargar_documento(url: str , ext: str, output_dir: str, identificador: str) -> None:
+def download_documento(url: str , ext: str, output_dir: str, identificador: str) -> None:
     """
     Descarga un documento desde una URL y lo guarda en el directorio especificado.
     Parámetros:
@@ -109,12 +109,12 @@ def download_boe_documentos(json_filepath: str):
                             if url_xml:
                                 xml_output_dir = os.path.join(output_dir, "xml")
                                 os.makedirs(xml_output_dir, exist_ok=True)
-                                descargar_documento(url_xml, "xml", xml_output_dir, identificador)
+                                download_documento(url_xml, "xml", xml_output_dir, identificador)
                             else:
                                 print(f"No se encontró URL XML ni HTML para {identificador}")
 
 
-def procesar_rango_fechas(start_date: str, end_date: str, base_path: str):
+def download_rango_fechas(start_date: str, end_date: str, base_path: str):
     """
     Procesa todos los archivos JSON en un rango de fechas y ejecuta la función download_boe_documentos.
     
@@ -145,4 +145,4 @@ if __name__ == "__main__":
     START_DATE = "20100101"
     END_DATE = "20250322"
 
-    procesar_rango_fechas(START_DATE, END_DATE, BASE_PATH)
+    download_rango_fechas(START_DATE, END_DATE, BASE_PATH)

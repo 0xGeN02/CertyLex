@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "certylex"
+name = "certylex_api"
 version = "0.1.0"
 description = "This project is designed to implement neural networks and LLMs to analyze legal documents."
 authors = ["0xGeN02 <manuelmateodgl02@gmail.com>"]
@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11, <3.12"
+python = "^3.13.0"
 fastapi = "^0.115.11"
 uvicorn = "^0.34.0"
 python-dotenv = "^1.0.1"
@@ -15,6 +15,7 @@ numpy = "^2.2.4"
 matplotlib = "^3.10.1"
 ipykernel = "^6.29.5"
 requests = "^2.32.3"
+pydantic-core = "^2.32.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

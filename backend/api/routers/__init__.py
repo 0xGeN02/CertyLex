@@ -2,8 +2,8 @@
     API routers package
 """
 
-from .auth import auth_router
-from .boe import boe_router
+from .auth.route import router as auth_router
+from .boe.route import router as boe_router
 
 __all__ = [
     "auth_router",

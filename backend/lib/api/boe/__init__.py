@@ -2,4 +2,5 @@
 This module contains the functions to parse the BOE Sumario.
 """
 
-from .boe import download_boe_sumario
+from .sumario import download_boe_sumario
+from .diario import download_rango_fechas

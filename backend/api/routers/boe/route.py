@@ -5,7 +5,7 @@
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/api/boe",
+    prefix="/boe",
     tags=["BOE"],
 )
 
