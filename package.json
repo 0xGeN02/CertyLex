@@ -12,7 +12,7 @@
     "python:run:boe": "poetry run python backend/data/api/boe.py"
   },
   "dependencies": {
-    "next": "15.2.2",
+    "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -23,13 +23,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "`^15.2.2",
+    "eslint-config-next": "^15.2.2",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }, 
-  
+  },
   "engines": {
-    "node": "^22.x",
-    "npm": "^8.x" 
+    "node": "^23.x",
+    "npm": "^11.x"
   }
 }
