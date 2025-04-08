@@ -10,8 +10,9 @@ readme = "README.md"
 requires-python = "3.13.2"
 dependencies = [
     "nvidia-nccl-cu12 (==2.21.5)",
-    "torch (>=2.6.0,<3.0.0)",
-    "scikit-learn (>=1.6.1,<2.0.0)"
+    "torch (==2.6)",
+    "scikit-learn (>=1.6.1,<2.0.0)",
+    "torchvision (>=0.21.0,<0.22.0)"
 ]
 
 [tool.poetry]
