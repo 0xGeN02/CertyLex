@@ -9,7 +9,8 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = "3.11.5"
 dependencies = [
-    "tensorflow (==2.19)"
+    "tensorflow (==2.19)",
+    "ipykernel (>=6.29.5,<7.0.0)"
 ]
 
 [tool.poetry]
