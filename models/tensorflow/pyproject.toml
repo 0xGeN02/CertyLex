@@ -12,6 +12,10 @@ dependencies = [
     "tensorflow (==2.19)"
 ]
 
+[tool.poetry]
+packages = [
+    { include = "tensorflow_models" }
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -1,5 +1,5 @@
 [project]
-name = "pytorch_models"
+name = "torch_models"
 version = "0.1.0"
 description = "Env used to develop the models with pytorch@2.6 + python@3.13.2"
 authors = [
@@ -15,8 +15,9 @@ dependencies = [
 ]
 
 [tool.poetry]
-
-
+packages = [
+    { include = "torch_models" }
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
