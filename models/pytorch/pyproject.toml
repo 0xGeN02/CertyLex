@@ -1,0 +1,20 @@
+[project]
+name = "pytorch_models"
+version = "0.1.0"
+description = "Env used to develop the models with pytorch@2.6 + python@3.13.2"
+authors = [
+    {name = "0xGeN02",email = "manuelmateodgl02@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = "3.13.2"
+dependencies = [
+]
+
+[tool.poetry]
+
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

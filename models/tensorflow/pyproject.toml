@@ -1,0 +1,17 @@
+[project]
+name = "tensorflow_models"
+version = "0.1.0"
+description = "Env used to develop the models with tensorflow@2.19 + python@3.11.5 + cpp@23 standard"
+authors = [
+    {name = "0xGeN02",email = "manuelmateodgl02@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = "3.11.5"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
