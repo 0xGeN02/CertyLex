@@ -7,7 +7,7 @@ This project is divided into two main components: the Python-based Backend API a
 ```mermaid
 flowchart TD
     UA[User] --> WA[Web Application]
-    WA --> API[Backend API (Python)]
+    WA --> API[Backend API Python]
     API --> DB[Database]
     API --> PROC[Data Processing]
     PROC --> API
