@@ -36,4 +36,3 @@ if __name__ == "__main__":
     PDF_FILE = "/ruta/al/archivo.pdf"
     OUTPUT_DIR = "/ruta/de/salida"
     extract_images_from_pdf(PDF_FILE, OUTPUT_DIR)
-    
