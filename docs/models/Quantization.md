@@ -1,8 +1,8 @@
-## What is a Quantized Model?
+# What is a Quantized Model?
 
 In the context of large language models (LLMs), **quantization** is a model optimization technique used to reduce the memory and compute requirements by lowering the precision of the numerical values (weights and activations) used in the model. This is done **without retraining the model**, and usually with **minimal loss in performance**.
 
-### 🎯 Why Quantize?
+## 🎯 Why Quantize?
 
 Original models are typically stored in **32-bit floating point (FP32)** format, which offers high precision but demands significant RAM and compute power. Quantization reduces this to smaller formats like **8-bit (INT8)** or even **4-bit**, making models:
 
@@ -45,7 +45,7 @@ This is an advanced 4-bit quantization scheme that:
 Quantization allows developers and researchers to **run large-scale AI models on consumer-grade hardware**. It is a powerful technique for local, offline AI inference, especially when paired with optimized formats like `Q4_K_M`.
 
 By choosing a quantized model, I’ve enabled my project to:
+
 - Function efficiently within hardware constraints
 - Deliver real-time inference
 - Maintain model performance with minimal trade-offs
-
