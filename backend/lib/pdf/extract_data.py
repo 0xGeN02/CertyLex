@@ -1,3 +1,6 @@
+"""
+Extrae el texto de un archivo PDF y las guarda en un directorio especificado.
+"""
 import PyPDF2
 
 def extract_text_from_pdf(file_path: str) -> str:
@@ -10,14 +13,14 @@ def extract_text_from_pdf(file_path: str) -> str:
     Retorna:
         str: Todo el texto contenido en el PDF.
     """
-    text = ""
+    extracted_text = ""
     with open(file_path, "rb") as file:
         reader = PyPDF2.PdfReader(file)
         for page in reader.pages:
             page_text = page.extract_text()
             if page_text:
-                text += page_text + "\n"
-    return text
+                extracted_text += page_text + "\n"
+    return extracted_text
 
 def extract_text_by_pages(file_path: str) -> list[str]:
     """
@@ -39,8 +42,8 @@ def extract_text_by_pages(file_path: str) -> list[str]:
 
 # Ejemplo de uso:
 if __name__ == "__main__":
-    pdf_file = "/ruta/al/archivo.pdf"
-    text = extract_text_from_pdf(pdf_file)
+    PDF_FILE = "/ruta/al/archivo.pdf"
+    text = extract_text_from_pdf(PDF_FILE)
     print(text)
-    pages_text = extract_text_by_pages(pdf_file)
-    print(pages_text)
+    pages = extract_text_by_pages(PDF_FILE)
+    print(pages)
