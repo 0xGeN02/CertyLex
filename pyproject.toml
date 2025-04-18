@@ -23,6 +23,10 @@ ipywidgets = "^8.1.5"
 spacy = "^3.8.5"
 pypdf2 = "^3.0.1"
 pymupdf = "^1.25.5"
+notebook = "^7.4.0"
+opencv-python = "^4.11.0.86"
+pytesseract = "^0.3.13"
+eth-hash = {extras = ["pycryptodome"], version = "^0.7.1"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

@@ -6,7 +6,6 @@ import cv2
 import numpy as np
 import pytesseract
 from eth_hash.auto import keccak
-import hashlib
 
 
 def is_blurry(image, threshold=100):
@@ -164,14 +163,25 @@ def generate_metadata(image, processed_image):
 def keccak_image_hash(image, fmt='.png'):
     """
     Generate a keccak256 hash of the image.
+    
     Args:
         image (numpy.ndarray): The input image to hash.
         fmt (str): The format to encode the image (e.g., '.png', '.jpg').
+        
     Returns:
         str: The keccak256 hash of the image (bytes32hex).
     """
+    # Encode the image to the specified format
     _, buf = cv2.imencode(fmt, image)
-    return keccak(buf).hex()
+    if buf is None:
+        raise ValueError("Failed to encode image")
+    
+    # Convert the encoded image to bytes
+    image_bytes = buf.tobytes()
+    
+    # Compute the keccak256 hash
+    return keccak(image_bytes).hex()
+
 
 # Pipeline configuration
 PIPELINE_STEPS = [
