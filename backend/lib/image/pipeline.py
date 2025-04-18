@@ -175,10 +175,10 @@ def keccak_image_hash(image, fmt='.png'):
     _, buf = cv2.imencode(fmt, image)
     if buf is None:
         raise ValueError("Failed to encode image")
-    
+
     # Convert the encoded image to bytes
     image_bytes = buf.tobytes()
-    
+
     # Compute the keccak256 hash
     return keccak(image_bytes).hex()
 

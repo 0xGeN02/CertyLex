@@ -27,6 +27,7 @@ notebook = "^7.4.0"
 opencv-python = "^4.11.0.86"
 pytesseract = "^0.3.13"
 eth-hash = {extras = ["pycryptodome"], version = "^0.7.1"}
+ollama = "^0.4.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
