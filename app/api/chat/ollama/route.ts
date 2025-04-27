@@ -5,13 +5,15 @@ const OLLAMA_BASE_URL = process.env.OLLAMA_HOST || 'http://localhost:11434';
 export async function POST(request: Request) {
   try {
     const { model, messages } = await request.json();
-    // Envía la conversación al endpoint de Ollama con streaming
+    // Build prompt from incoming messages
+    const prompt = messages.map((m: any) => m.content).join('\n');
+
     const res = await fetch(
-      `${OLLAMA_BASE_URL}/api/chat/${encodeURIComponent(model)}?stream=true`,
+      `${OLLAMA_BASE_URL}/api/generate`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({ model, prompt, stream: true }),
       }
     );
 
@@ -22,9 +24,37 @@ export async function POST(request: Request) {
       );
     }
 
-    // Reenvía el body como text/event-stream
-    return new NextResponse(res.body, {
-      headers: { 'Content-Type': 'text/event-stream' }
+    // Transform NDJSON → SSE (`data: …\n\n`)
+    const sseStream = new ReadableStream({
+      async start(controller) {
+        if (!res.body) {
+          controller.error(new Error('ReadableStream not yet supported in this environment'));
+          return;
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          for (const line of chunk.split('\n').filter(Boolean)) {
+            controller.enqueue(encoder.encode(`data: ${line}\n\n`));
+            console.log('Chunk:', line);
+          }
+        }
+        controller.close();
+      },
+    });
+
+    console.log('Model response:', sseStream);
+    return new NextResponse(sseStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     });
   } catch (e) {
     console.error('Chat error:', e);
