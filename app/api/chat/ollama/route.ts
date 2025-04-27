@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log('Model response:', sseStream);
+    console.log('Model response:', sseStream); // Chunk: {"model":"llama3.2:3b","created_at":"2025-04-27T22:26:30.080840908Z","response":"Hola","done":false}
     return new NextResponse(sseStream, {
       headers: {
         'Content-Type': 'text/event-stream',
