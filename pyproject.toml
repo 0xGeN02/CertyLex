@@ -29,6 +29,7 @@ pytesseract = "^0.3.13"
 eth-hash = {extras = ["pycryptodome"], version = "^0.7.1"}
 ollama = "^0.4.8"
 reportlab = "^4.4.0"
+pandas = "^2.2.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
