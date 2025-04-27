@@ -208,26 +208,45 @@ def evaluate_image_quality(orig, proc):
 
 # --- Optimización asistida ---
 
-def optimize_pipeline(orig_image, param_space, llm_call, max_iter=5):
+def optimize_pipeline(orig_image, param_space, llm_call, max_iter=3):
     """
     Optimiza hiperparámetros mediante muestreo y ajuste LLM.
+    Devuelve el mejor resultado con historial y configuración.
     """
-    best = {'score': -np.inf}
+    best = {'score': -float('inf')}
     for _ in range(max_iter):
-        # muestreo aleatorio de parámetros
-        params = {k: {sk: random.choice(v) for sk, v in sp.items()} for k, sp in param_space.items()}
-        # aplicar pipeline inicial
-        img = orig_image.copy()
-        for step in build_pipeline(params):
-            img = step(img)
-        metrics = evaluate_image_quality(orig_image, img)
-        # pedir ajuste al LLM
-        new_params = llm_call({'orig': orig_image, 'proc': img, 'metrics': metrics, 'params': params})
-        # re-evaluar con parámetros sugeridos
-        img2 = orig_image.copy()
-        for step in build_pipeline(new_params):
-            img2 = step(img2)
-        metrics2 = evaluate_image_quality(orig_image, img2)
-        if metrics2['score'] > best['score']:
-            best = {'score': metrics2['score'], 'image': img2, 'params': new_params, 'metrics': metrics2}
+        # Randomly sample parameters
+        current_params = {
+            k: {sk: random.choice(v) for sk, v in sp.items()}
+            for k, sp in param_space.items()
+        }
+        # Enable all steps initially
+        config = {
+            "use": dict.fromkeys(current_params.keys(), True),
+            "params": current_params
+        }
+        steps = build_pipeline(config)
+        img, history = process_image(orig_image, steps)
+        metrics = evaluate_image_quality(orig_image, img if isinstance(img, np.ndarray) else None)
+
+        # Get LLM-adjusted config
+        new_config = llm_call({
+            "orig": orig_image,
+            "proc": img,
+            "metrics": metrics,
+            "params": current_params
+        })
+        new_steps = build_pipeline(new_config)
+        new_img, new_history = process_image(orig_image, new_steps)
+        new_metrics = evaluate_image_quality(orig_image, new_img if isinstance(new_img, np.ndarray) else None)
+
+        # Update best
+        if new_metrics['score'] > best.get('score', -float('inf')):
+            best = {
+                'image': new_img,
+                'config': new_config,
+                'metrics': new_metrics,
+                'history': new_history,
+                'score': new_metrics['score']
+            }
     return best
