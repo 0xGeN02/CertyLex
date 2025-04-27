@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {toast} from 'sonner';
 
 export type Model = {
   name: string;
@@ -21,6 +22,11 @@ export function ModelSelector({ models, selected, onSelect }: Props) {
   const apply = () => {
     onSelect(current);
     setOpen(false);
+    console.log('Modelo seleccionado:', current);
+    toast.info(`Modelo seleccionado: ${current}`, {
+      description: 'El modelo ha sido cambiado.',
+      duration: 2000,
+    });
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useChat, type UseChatOptions } from "ai/react";
+import { useChat, UseChatOptions } from "@ai-sdk/react"
 import { Chat } from "@/components/ui/chat";
 import { ModelSelector, type Model } from "@/components/ui/model-selector";
 
@@ -19,9 +19,15 @@ export function ChatDemo(props: ChatDemoProps) {
     fetch("/api/chat/ollama/models")
       .then((res) => res.json())
       .then((data) => {
-        setModels(data.models);
-        if (data.models.length > 0) {
-          setSelectedModel(data.models[0].name);
+        console.log("models API response:", data);
+        // Si data es un array, úsalo; si trae .models, úsalo; sino, []
+        const modelsArray: Model[] = Array.isArray(data)
+          ? data
+          : data.models ?? [];
+        setModels(modelsArray);
+        if (modelsArray.length > 0) {
+          setSelectedModel(modelsArray[0].name);
+          console.log("selectedModel", modelsArray[0].name);
         }
       })
       .catch(console.error);
@@ -31,6 +37,7 @@ export function ChatDemo(props: ChatDemoProps) {
   const { messages, input, handleInputChange, handleSubmit, append, stop, isLoading } =
     useChat({
       ...props,
+      api: "/api/chat/ollama",
       body: { model: selectedModel },
     });
 
