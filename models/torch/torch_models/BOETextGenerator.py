@@ -80,8 +80,7 @@ class BOETextDataset(Dataset):
         self.tokenizer = tokenizer
         self.block_size = block_size
         self.examples = []
-        raw_texts = []
-        # procesar cada XML en file_list
+        # Procesar cada XML en file_list por separado
         for path in file_list:
             tree = ET.parse(path)
             root = tree.getroot()
@@ -89,20 +88,18 @@ class BOETextDataset(Dataset):
             paragraphs = [p.text for p in root.findall('.//texto//p') if p.text]
             body = "\n".join(paragraphs)
             doc = f"<TITULO> {title} </TITULO>\n<BODY> {body} </BODY>"
-            raw_texts.append(doc)
-        # concatenar y tokenizar
-        concatenated = "\n".join(raw_texts)
-        tokenized = tokenizer(concatenated, return_tensors='pt', truncation=False)
-        input_ids = tokenized['input_ids'].squeeze(0)
-        # dividir en bloques
-        for i in range(0, input_ids.size(0) - block_size + 1, block_size):
-            block = input_ids[i:i + block_size]
-            self.examples.append(block)
+            # Tokenizar cada documento por separado y dividir en bloques
+            tokenized = tokenizer(doc, return_tensors='pt', truncation=True, max_length=block_size, padding='max_length')
+            input_ids = tokenized['input_ids'].squeeze(0)
+            self.examples.append(input_ids)
 
     def __len__(self): return len(self.examples)
     def __getitem__(self, i):
-        return {"input_ids": self.examples[i], "attention_mask": torch.ones_like(self.examples[i]), "labels": self.examples[i]}
-
+        return {
+            "input_ids": self.examples[i],
+            "attention_mask": torch.ones_like(self.examples[i]),
+            "labels": self.examples[i]
+        }
 
 def train_gpt2_range(
     base_dir: str,

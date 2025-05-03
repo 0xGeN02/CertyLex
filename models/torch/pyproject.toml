@@ -16,6 +16,7 @@ dependencies = [
     "transformers (>=4.51.3,<5.0.0)",
     "accelerate (>=1.6.0,<2.0.0)",
     "nltk (>=3.9.1,<4.0.0)",
+    "datasets (>=3.5.1,<4.0.0)",
 ]
 
 [tool.poetry]

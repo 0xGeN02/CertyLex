@@ -30,9 +30,9 @@ class BOETextDataset(Dataset):
         self.tokenizer = tokenizer
         self.block_size = block_size
         self.examples = []
-        raw_texts = []
         for fn in os.listdir(xml_dir):
-            if not fn.endswith('.xml'): continue
+            if not fn.endswith('.xml'):
+                continue
             path = os.path.join(xml_dir, fn)
             tree = ET.parse(path)
             root = tree.getroot()
@@ -40,18 +40,24 @@ class BOETextDataset(Dataset):
             paragraphs = [p.text for p in root.findall('.//texto//p') if p.text]
             body = "\n".join(paragraphs)
             doc = f"<TITULO> {title} </TITULO>\n<BODY> {body} </BODY>"
-            raw_texts.append(doc)
-        concatenated = "\n".join(raw_texts)
-        tokenized = tokenizer(concatenated, return_tensors='pt')
-        input_ids = tokenized['input_ids'].squeeze(0)
-        for i in range(0, input_ids.size(0) - block_size + 1, block_size):
-            block = input_ids[i:i + block_size]
-            self.examples.append(block)
+            # Tokenizar y truncar cada documento individualmente
+            tokenized = tokenizer(
+                doc,
+                return_tensors='pt',
+                truncation=True,
+                max_length=block_size,
+                padding='max_length'
+            )
+            input_ids = tokenized['input_ids'].squeeze(0)
+            self.examples.append(input_ids)
 
     def __len__(self): return len(self.examples)
     def __getitem__(self, i):
-        return {"input_ids": self.examples[i], "attention_mask": torch.ones_like(self.examples[i]), "labels": self.examples[i]}
-
+        return {
+            "input_ids": self.examples[i],
+            "attention_mask": torch.ones_like(self.examples[i]),
+            "labels": self.examples[i]
+        }
 
 def train_gpt2(xml_dir: str, output_dir: str = './boe_gpt2'):
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
