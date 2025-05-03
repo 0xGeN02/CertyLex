@@ -11,6 +11,8 @@ interface MessageListProps {
   messages: Message[]
   showTimeStamps?: boolean
   isTyping?: boolean
+  assistantClassName?: string
+  userClassName?: string
   messageOptions?:
     | AdditionalMessageOptions
     | ((message: Message) => AdditionalMessageOptions)
@@ -20,6 +22,8 @@ export function MessageList({
   messages,
   showTimeStamps = true,
   isTyping = false,
+  assistantClassName,
+  userClassName,
   messageOptions,
 }: MessageListProps) {
   return (
@@ -30,10 +34,16 @@ export function MessageList({
             ? messageOptions(message)
             : messageOptions
 
+        const className =
+          message.role === "assistant"
+            ? assistantClassName
+            : userClassName
+
         return (
           <ChatMessage
             key={index}
             showTimeStamp={showTimeStamps}
+            className={className}
             {...message}
             {...additionalOptions}
           />

@@ -36,12 +36,50 @@ export function ChatDemo(props: ChatDemoProps) {
   }, []);
 
   // 2) hook de chat, inyectando el modelo seleccionado en el body
-  const { messages, input, handleInputChange, handleSubmit, append, stop, isLoading } =
+  const { messages, input, handleInputChange, append, stop, isLoading } =
     useChat({
       ...props,
       api: "/api/chat/ollama",
       body: { model: selectedModel },
     });
+
+  const handleChatSubmit = (
+    event?: { preventDefault?: () => void }
+  ) => {
+    if (event && event.preventDefault) {
+      event.preventDefault();
+    }
+
+    if (!input.trim()) return;
+
+    // Append the user's message to the chat
+    append({ role: "user", content: input });
+
+    fetch("/api/chat/ollama", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: [...messages, { role: "user", content: input }],
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          console.error("Failed to fetch response from API");
+          return;
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data?.response) {
+          // Append the LLM's response to the chat
+          append({ role: "assistant", content: data.response });
+        }
+      })
+      .catch((error) => {
+        console.error("Error during chat submission:", error);
+      });
+  };
 
   return (
     <div className="flex flex-col h-[500px] w-full space-y-4">
@@ -56,7 +94,7 @@ export function ChatDemo(props: ChatDemoProps) {
       <Chat
         className="grow"
         messages={messages}
-        handleSubmit={handleSubmit}
+        handleSubmit={handleChatSubmit}
         input={input}
         handleInputChange={handleInputChange}
         isGenerating={isLoading}

@@ -17,6 +17,9 @@ interface MessageInputBaseProps
   stop?: () => void
   isGenerating: boolean
   enableInterrupt?: boolean
+  buttonLabel?: string // Added buttonLabel prop
+  icon?: React.ReactNode // Added icon prop
+  buttonClassName?: string // Added buttonClassName prop
 }
 
 interface MessageInputWithoutAttachmentProps extends MessageInputBaseProps {
@@ -41,6 +44,8 @@ export function MessageInput({
   stop,
   isGenerating,
   enableInterrupt = true,
+  buttonLabel, // Destructure buttonLabel to prevent it from being passed to the DOM
+  buttonClassName, // Destructure buttonClassName to prevent it from being passed to the DOM
   ...props
 }: MessageInputProps) {
   const [isDragging, setIsDragging] = useState(false)
@@ -239,8 +244,8 @@ export function MessageInput({
           <Button
             type="submit"
             size="icon"
-            className="h-8 w-8 transition-opacity"
-            aria-label="Send message"
+            className={cn("h-8 w-8 transition-opacity", buttonClassName)} // Use buttonClassName here
+            aria-label={buttonLabel || "Send message"}
             disabled={props.value === "" || isGenerating}
           >
             <ArrowUp className="h-5 w-5" />

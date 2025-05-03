@@ -1,7 +1,7 @@
 "use client"
 
 import { forwardRef, useCallback, useState, type ReactElement } from "react"
-import { ArrowDown, ThumbsDown, ThumbsUp } from "lucide-react"
+import { ArrowDown, ThumbsDown, ThumbsUp, FileText, Send } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useAutoScroll } from "@/hooks/use-auto-scroll"
@@ -11,6 +11,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { MessageInput } from "@/components/ui/message-input"
 import { MessageList } from "@/components/ui/message-list"
 import { PromptSuggestions } from "@/components/ui/prompt-suggestions"
+
 
 interface ChatPropsBase {
   handleSubmit: (
@@ -64,7 +65,7 @@ export function Chat({
           <div className="border-r pr-1">
             <CopyButton
               content={message.content}
-              copyMessage="Copied response to clipboard!"
+              copyMessage="Copiado al portapapeles!"
             />
           </div>
           <Button
@@ -87,7 +88,7 @@ export function Chat({
       ) : (
         <CopyButton
           content={message.content}
-          copyMessage="Copied response to clipboard!"
+          copyMessage="Copiado al portapapeles!"
         />
       ),
     }),
@@ -95,12 +96,28 @@ export function Chat({
   )
 
   return (
-    <ChatContainer className={className}>
+    <ChatContainer className={cn("rounded-lg border border-gray-200 shadow-sm", className)}>
+      {/* BOE-style header */}
+      {isEmpty && (
+        <div className="bg-[#f5f5f5] border-b border-gray-200 p-4">
+          <div className="flex items-center gap-2 justify-center">
+            <FileText className="h-5 w-5 text-[#9e2a2b]" />
+            <h2 className="text-center font-medium text-[#9e2a2b]">Asistente Legal CertyLex</h2>
+          </div>
+          <p className="text-center text-sm text-gray-600 mt-1">
+            Consulta información legal basada en el Boletín Oficial del Estado
+          </p>
+        </div>
+      )}
+      
       {isEmpty && append && suggestions ? (
         <PromptSuggestions
-          label="Try this prompts"
+          label="Sugerencias"
           append={append}
-          suggestions={suggestions}
+          suggestions={suggestions.map((s) => ({
+            content: s,
+            icon: <FileText className="h-4 w-4 text-[#9e2a2b]" />,
+          }))}
         />
       ) : null}
 
@@ -110,12 +127,14 @@ export function Chat({
             messages={messages}
             isTyping={isTyping}
             messageOptions={messageOptions}
+            assistantClassName="bg-[#f8f9fa] border border-gray-200 rounded-lg p-4 shadow-sm"
+            userClassName="bg-[#e9f5ff] border border-blue-100 rounded-lg p-4"
           />
         </ChatMessages>
       ) : null}
 
       <ChatForm
-        className="mt-auto"
+        className="mt-auto border-t border-gray-200 bg-white p-4"
         isPending={isGenerating || isTyping}
         handleSubmit={handleSubmit}
       >
@@ -128,6 +147,11 @@ export function Chat({
             setFiles={setFiles}
             stop={stop}
             isGenerating={isGenerating}
+            placeholder="Consulta sobre legislación española..."
+            buttonLabel={isGenerating ? "Detener" : "Enviar"}
+            icon={isGenerating ? null : <Send className="h-4 w-4" />}
+            className="border border-gray-300 focus-within:border-[#9e2a2b] focus-within:ring-1 focus-within:ring-[#9e2a2b]"
+            buttonClassName="bg-[#9e2a2b] hover:bg-[#801f20]"
           />
         )}
       </ChatForm>
