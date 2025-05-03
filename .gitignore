@@ -54,5 +54,7 @@ __pycache__/
 /backend/samples/data/output
 
 # models
+/models/torch/boe_bart/*
+/models/torch/boe_gpt2/*
 /models/torch/*/boe_bart/*
 /models/torch/*/boe_gpt2/*

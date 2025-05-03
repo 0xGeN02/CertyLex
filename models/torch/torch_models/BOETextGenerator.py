@@ -344,7 +344,7 @@ def generate_boe(model, tokenizer, prompt, max_length=300, num_return_sequences=
 if __name__ == '__main__':
     base_dir = '../../backend/data/boe/diario'
     # rango deseado
-    start_date = '01/01/2025'
+    start_date = '01/01/2020'
     end_date   = '01/01/2025'
 
     # Entrenar generativo
