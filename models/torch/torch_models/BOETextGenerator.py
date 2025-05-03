@@ -36,6 +36,7 @@ def list_xml_files_in_range(
         start_date: fecha inicio en formato 'DD/MM/YYYY'
         end_date: fecha fin en formato 'DD/MM/YYYY'
         date_format: formato de las fechas de entrada
+        Tiene que devolver una ruta como 'backend/data/boe/diario/2023/20230101/xml/*.xml'
 
     Returns:
         Lista de rutas absolutas a archivos .xml dentro del rango.
@@ -114,9 +115,13 @@ def train_gpt2_range(
     Entrena GPT-2 sobre los archivos XML en el rango de fechas dado.
     """
     files = list_xml_files_in_range(base_dir, start_date, end_date)
+    if not files:
+        raise ValueError(f"No XML files found in {base_dir} for the given date range: {start_date} to {end_date}")
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     if tokenizer.eos_token is None:
         tokenizer.add_special_tokens({'eos_token': ''})
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
     dataset = BOETextDataset(files, tokenizer, block_size=block_size)
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
     model = GPT2LMHeadModel.from_pretrained('gpt2')
@@ -256,7 +261,7 @@ class ExtractiveSummarizerGA:
         return coverage - 0.5 * red
 
     def summarize(self, text: str) -> str:
-        import nltk; nltk.download('punkt', quiet=True)
+        import nltk; nltk.download('punkt', quiet=True); nltk.download('punkt_tab', quiet=True)
         from nltk.tokenize import sent_tokenize
         sentences = sent_tokenize(text)
         n = len(sentences)
@@ -303,14 +308,47 @@ class ExtractiveSummarizerGA:
         summary = " ".join([s for bit, s in zip(best, sentences) if bit==1])
         return summary
 
+def generate_boe(model, tokenizer, prompt, max_length=300, num_return_sequences=1, device=None):
+    """
+    Genera nuevos textos de formato BOE usando el modelo y tokenizer dados.
+    Args:
+        model: Modelo GPT2LMHeadModel entrenado.
+        tokenizer: Tokenizer GPT2TokenizerFast entrenado.
+        prompt: Texto de inicio para la generación.
+        max_length: Longitud máxima del texto generado.
+        num_return_sequences: Número de textos a generar.
+        device: 'cuda' o 'cpu'. Si None, se detecta automáticamente.
+    Returns:
+        Lista de textos generados.
+    """
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
+    model.eval()
+    input_ids = tokenizer.encode(prompt, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.generate(
+            input_ids,
+            max_length=max_length,
+            num_return_sequences=num_return_sequences,
+            do_sample=True,
+            top_k=50,
+            top_p=0.95,
+            temperature=0.9,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        )
+    generated = [tokenizer.decode(out, skip_special_tokens=True) for out in outputs]
+    return generated
+
 # ------------------------------------------
 # 4) Ejemplo de uso con rango de fechas
 # ------------------------------------------
 if __name__ == '__main__':
-    base_dir = 'backend/data/boe/diario'
+    base_dir = '../../backend/data/boe/diario'
     # rango deseado
-    start_date = '06/01/2023'
-    end_date   = '21/03/2024'
+    start_date = '01/01/2025'
+    end_date   = '01/01/2025'
 
     # Entrenar generativo
     gpt2_model, gpt2_tokenizer = train_gpt2_range(base_dir, start_date, end_date)

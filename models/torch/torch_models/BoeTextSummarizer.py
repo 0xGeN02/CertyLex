@@ -201,7 +201,7 @@ class ExtractiveSummarizerGA:
 # 3) Example usage
 # ------------------------------------------
 if __name__ == '__main__':
-    xml_dir = '/ruta/a/tu/dataset_xml'
+    xml_dir = '../../backend/data/boe/'  # Directory with XML files
 
     # 3.1 Entrenar GPT-2 generativo
     gpt2_model, gpt2_tokenizer = train_gpt2(xml_dir)
