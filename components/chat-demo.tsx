@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useChat, UseChatOptions } from "@ai-sdk/react"
 import { Chat } from "@/components/ui/chat";
 import { ModelSelector, type Model } from "@/components/ui/model-selector";
+import { Hyperparameters } from "./ui/hyperparameter-form";
 
 type ChatDemoProps = {
   initialMessages?: UseChatOptions["initialMessages"];
+  hyperparameters?: Hyperparameters;
 };
 
 export function ChatDemo(props: ChatDemoProps) {
