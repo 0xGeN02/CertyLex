@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 import { Toaster } from "sonner";
 
@@ -36,6 +37,21 @@ export default function RootLayout({
                   <span className="text-xl font-bold text-indigo-600">CertyLex</span>
                   <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">AI Legal Assistant</span>
                 </div>
+                <nav className="hidden md:ml-8 md:flex md:space-x-8">
+                  <Link href="/" className="border-indigo-500 text-gray-900 hover:border-indigo-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                    Chat General
+                  </Link>
+                  <Link href="/pdf-analysis" className="border-transparent text-gray-500 hover:border-indigo-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                    Análisis de Documentos
+                  </Link>
+                </nav>
+              </div>
+              <div className="hidden md:flex md:items-center">
+                <span className="inline-flex rounded-md shadow-sm">
+                  <Link href="/pdf-analysis" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                    Analizar PDF
+                  </Link>
+                </span>
               </div>
             </div>
           </div>
