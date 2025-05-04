@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Chat } from "@/components/ui/chat";
 import { Hyperparameters } from "./ui/hyperparameter-form";
-import { FileText, Upload, RefreshCw, CheckCircle, AlertTriangle, FileEdit, MessageSquare, BookOpen, ChevronRight } from "lucide-react";
+import { FileText, Upload, RefreshCw, CheckCircle, AlertTriangle, FileEdit, MessageSquare, BookOpen, User, IdCard, Building } from "lucide-react";
 
 type PDFChatProps = {
   pdfFile: File | null;
@@ -14,7 +14,13 @@ type PDFChatProps = {
   hyperparameters?: Hyperparameters;
 };
 
-type ViewMode = "original" | "improved" | "analysis";
+type ViewMode = "original" | "improved" | "analysis" | "entities";
+
+type ExtractedEntities = {
+  nombres: string[];
+  nifs: string[];
+  nif_empresa: string[];
+};
 
 export function PDFChat(props: PDFChatProps) {
   const { pdfFile, pdfContent, isLoading, onFileUpload, hyperparameters } = props;
@@ -23,6 +29,8 @@ export function PDFChat(props: PDFChatProps) {
     improvedDocument: string;
     formattedResponse: string;
   } | null>(null);
+  const [extractedEntities, setExtractedEntities] = useState<ExtractedEntities | null>(null);
+  const [isExtractingEntities, setIsExtractingEntities] = useState<boolean>(false);
 
   // Set up chat hook for the conversation with PDF content
   const { messages, input, handleInputChange, append, stop, isLoading: isChatLoading } =
@@ -33,6 +41,31 @@ export function PDFChat(props: PDFChatProps) {
         ...hyperparameters
       },
     });
+
+  // Función para extraer entidades del texto
+  const extractEntities = async (text: string) => {
+    try {
+      setIsExtractingEntities(true);
+      const response = await fetch('/api/entities/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al extraer entidades');
+      }
+
+      const data = await response.json();
+      setExtractedEntities(data);
+      return data;
+    } catch (error) {
+      console.error('Error:', error);
+      return { nombres: [], nifs: [], nif_empresa: [] };
+    } finally {
+      setIsExtractingEntities(false);
+    }
+  };
 
   // Handle file input change
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,6 +112,9 @@ export function PDFChat(props: PDFChatProps) {
             improvedDocument: data.improvedDocument,
             formattedResponse: data.formattedResponse
           });
+          
+          // Extract entities from the PDF content
+          extractEntities(pdfContent);
           
           // Switch to analysis view when we get a response
           setViewMode("analysis");
@@ -201,6 +237,22 @@ export function PDFChat(props: PDFChatProps) {
               <BookOpen className="h-4 w-4 mr-1.5" />
               Análisis
             </button>
+            <button
+              onClick={() => {
+                if (pdfContent && !extractedEntities) {
+                  extractEntities(pdfContent);
+                }
+                setViewMode("entities");
+              }}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md flex items-center ${
+                viewMode === "entities" 
+                  ? "bg-white text-indigo-700 shadow-sm border border-gray-200" 
+                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+              }`}
+            >
+              <User className="h-4 w-4 mr-1.5" />
+              Entidades
+            </button>
           </div>
         </div>
 
@@ -270,6 +322,111 @@ export function PDFChat(props: PDFChatProps) {
                 <p>Haz una pregunta para recibir un análisis del documento</p>
               </div>
             ) : null}
+            
+            {/* Nueva sección para mostrar las entidades extraídas */}
+            {viewMode === "entities" && (
+              <div className="p-4">
+                {isExtractingEntities ? (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <RefreshCw className="h-8 w-8 text-indigo-600 animate-spin mb-4" />
+                    <p className="text-gray-600">Extrayendo entidades del documento...</p>
+                  </div>
+                ) : extractedEntities ? (
+                  <div>
+                    {/* Sección de personas */}
+                    <div className="mb-8">
+                      <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center">
+                        <User className="h-5 w-5 mr-2 text-indigo-600" />
+                        Personas identificadas
+                      </h3>
+                      
+                      {extractedEntities.nombres.length > 0 ? (
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Nombre
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  DNI/NIF
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {extractedEntities.nombres.map((nombre, index) => {
+                                // Intentar asociar cada nombre con un NIF si está disponible
+                                const nifIndex = Math.min(index, extractedEntities.nifs.length - 1);
+                                const nif = index < extractedEntities.nifs.length ? extractedEntities.nifs[nifIndex] : "—";
+                                
+                                return (
+                                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                      {nombre}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                      {nif !== "—" ? (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                          <IdCard className="h-3 w-3 mr-1" /> {nif}
+                                        </span>
+                                      ) : "—"}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 italic">No se han detectado personas en el documento</p>
+                      )}
+                    </div>
+                    
+                    {/* Sección de empresas */}
+                    {extractedEntities.nif_empresa.length > 0 && (
+                      <div>
+                        <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center">
+                          <Building className="h-5 w-5 mr-2 text-indigo-600" />
+                          Empresas identificadas
+                        </h3>
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  NIF Empresa
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {extractedEntities.nif_empresa.map((nif, index) => (
+                                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      <Building className="h-3 w-3 mr-1" /> {nif}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <p className="text-gray-500 mb-4">No hay entidades extraídas. Haz clic en el botón para analizar el documento.</p>
+                    <button
+                      onClick={() => pdfContent && extractEntities(pdfContent)}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                    >
+                      Extraer entidades
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

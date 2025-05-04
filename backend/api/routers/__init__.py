@@ -2,10 +2,10 @@
     API routers package
 """
 
-from .auth.route import router as auth_router
-from .boe.route import router as boe_router
+from .entities.route import entity_router
+from .nlp_entities.route import nlp_entity_router
 
 __all__ = [
-    "auth_router",
-    "boe_router",
+    "entity_router",
+    "nlp_entity_router",
 ]
