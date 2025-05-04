@@ -138,8 +138,8 @@ class SuperResolutionEnhancer:
         # Paso 2: Extraer características de la imagen original
         features = self.feature_extractor.extract_features(image)
         
-        # Paso 3: Preparar parámetros para optimización
-        initial_params = [1.0, 1.2, 0.5]  # [sharpness, contrast, denoise_strength]
+        # Paso 3: Preparar parámetros para optimización - valores más conservadores
+        initial_params = [0.5, 1.1, 0.3]  # [sharpness, contrast, denoise_strength]
         
         # Función objetivo que mide la calidad de la imagen procesada
         def objective_function(params):
@@ -164,29 +164,35 @@ class SuperResolutionEnhancer:
     def _apply_enhancement(self, image, params):
         """Aplica mejoras a la imagen según los parámetros dados"""
         sharpness, contrast, denoise_strength = params
+        result = image.copy()  # Trabajar con una copia para evitar modificar la original
         
-        # Aplicar nitidez
-        if sharpness > 0:
-            kernel = np.array([[-1, -1, -1], 
-                               [-1, 9 + sharpness, -1], 
-                               [-1, -1, -1]]) / (sharpness + 5)
-            image = cv2.filter2D(image, -1, kernel)
-        
-        # Ajustar contraste
-        image = cv2.convertScaleAbs(image, alpha=contrast, beta=0)
-        
-        # Reducir ruido
+        # Reducir ruido primero (antes de aplicar nitidez)
         if denoise_strength > 0:
-            image = cv2.fastNlMeansDenoisingColored(
-                image, 
+            # Usar un valor más bajo para h y hColor para un efecto más sutil
+            result = cv2.fastNlMeansDenoisingColored(
+                result, 
                 None, 
-                h=10 * denoise_strength, 
-                hColor=10 * denoise_strength, 
+                h=5 * denoise_strength, 
+                hColor=5 * denoise_strength, 
                 templateWindowSize=7, 
                 searchWindowSize=21
             )
         
-        return image
+        # Aplicar nitidez de forma más sutil
+        if sharpness > 0:
+            # Kernel menos agresivo
+            kernel = np.array([[-0.5, -0.5, -0.5], 
+                              [-0.5, 5 + sharpness, -0.5], 
+                              [-0.5, -0.5, -0.5]]) / (sharpness + 5)
+            result = cv2.filter2D(result, -1, kernel)
+        
+        # Ajustar contraste con un valor beta para ajustar el brillo si es necesario
+        # Añadir un pequeño valor beta para evitar imágenes demasiado oscuras
+        alpha = contrast  # Valor de contraste
+        beta = 5  # Pequeño ajuste de brillo para evitar imágenes oscuras
+        result = cv2.convertScaleAbs(result, alpha=alpha, beta=beta)
+        
+        return result
     
     def _evaluate_quality(self, image, original_features):
         """Evalúa la calidad de la imagen procesada"""
@@ -200,12 +206,12 @@ class SuperResolutionEnhancer:
                 (processed_features.shape[1], processed_features.shape[0])
             )
         
-        # Calcular métricas de calidad
-        # 1. Nitidez (varianza del laplaciano)
+        # 1. Nitidez (varianza del laplaciano) - pero con menor peso
         laplacian = cv2.Laplacian(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.CV_64F)
         sharpness = laplacian.var()
         
         # 2. Preservación de características (correlación con características originales)
+        # Darle mayor peso para preservar la estructura original
         correlation = np.corrcoef(
             original_features.flatten(), 
             processed_features.flatten()
@@ -214,8 +220,21 @@ class SuperResolutionEnhancer:
         # 3. Contraste (desviación estándar de los valores de píxel)
         contrast = np.std(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
         
-        # Combinar métricas en una puntuación general
-        quality_score = sharpness * 0.4 + correlation * 0.4 + contrast * 0.2
+        # 4. Nueva métrica: Naturalidad de la imagen (basada en estadísticas de histograma)
+        # Calculamos la entropía del histograma como medida de naturalidad
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
+        hist = hist / hist.sum()  # Normalizar
+        non_zero_hist = hist[hist > 0]
+        naturalness = -np.sum(non_zero_hist * np.log2(non_zero_hist))
+        
+        # Combinar métricas con mayor énfasis en preservación y naturalidad
+        quality_score = (
+            sharpness * 0.2 +         # Menor peso a la nitidez
+            correlation * 0.4 +        # Mayor peso a preservar estructura original
+            contrast * 0.2 +           # Igual peso al contraste
+            naturalness * 0.2          # Nuevo factor: naturalidad
+        )
         
         return quality_score
     
