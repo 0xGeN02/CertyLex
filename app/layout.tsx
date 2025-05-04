@@ -44,6 +44,9 @@ export default function RootLayout({
                   <Link href="/pdf-analysis" className="border-transparent text-gray-500 hover:border-indigo-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                     Análisis de Documentos
                   </Link>
+                  <Link href="/imagen-enhancer" className="border-transparent text-gray-500 hover:border-indigo-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                    Mejora de Imágenes
+                  </Link>
                 </nav>
               </div>
               <div className="hidden md:flex md:items-center">

@@ -6,6 +6,7 @@ import sys
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # Crear la aplicación FastAPI
 app = FastAPI(
@@ -26,14 +27,21 @@ app.add_middleware(
 # Importar routers
 from backend.api.routers.entities.route import entity_router
 from backend.api.routers.nlp_entities.route import nlp_entity_router
+from backend.api.routers.image.route import image_router
 
 # Incluir routers en la aplicación
 app.include_router(entity_router, prefix="/api")
 app.include_router(nlp_entity_router, prefix="/api")
+app.include_router(image_router, prefix="/api")
 
 # Rutas básicas
 API_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-FAVICON_PATH = os.path.join(API_ROOT_DIR, "static/favicon.ico")
+STATIC_DIR = os.path.join(API_ROOT_DIR, "static")
+FAVICON_PATH = os.path.join(STATIC_DIR, "favicon.ico")
+
+# Configurar directorio de archivos estáticos
+os.makedirs(os.path.join(STATIC_DIR, "processed_images"), exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
 async def home():
