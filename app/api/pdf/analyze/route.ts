@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import modelfile from '@/src/modelfile';
 
 const OLLAMA_BASE_URL = process.env.OLLAMA_HOST || 'http://localhost:11434';
 
@@ -18,20 +17,66 @@ export async function POST(request: Request) {
     // que incluye el contenido del PDF y la pregunta del usuario
     const formattedQuestion = question || "Analiza este documento legal y proporciona mejoras";
     
-    // Aplicamos el formato del modelfile para el input
-    const prompt = `${modelfile.input.format.question.replace('{{user_input}}', formattedQuestion)}
+    // Aplicamos un formato estructurado para obtener mejores respuestas
+    const prompt = `Eres un asistente legal especializado en análisis de documentos jurídicos. 
+Analiza el siguiente documento legal y proporciona un análisis detallado con el siguiente formato EXACTO:
+
+# Análisis del [Tipo de documento]
+
+## Introducción
+[Proporciona un resumen conciso del documento, su propósito y las partes involucradas]
+
+## Detalles
+[Analiza las cláusulas más importantes, identificando:
+1. Cláusulas principales y su significado
+2. Obligaciones de cada parte
+3. Plazos relevantes
+4. Condiciones económicas
+5. Posibles cláusulas problemáticas o ambiguas]
+
+## Conclusión
+[Resume los puntos principales del documento, proporciona recomendaciones concretas y destaca los aspectos que requieren atención]
+
+La pregunta específica del usuario es: "${formattedQuestion}"
 
 DOCUMENTO A ANALIZAR:
 ${pdfContent}`;
 
-    // Llamada a la API de Ollama
-    const res = await fetch(
+    // Creamos también un prompt específico para obtener un resumen con sugerencias
+    const summaryPrompt = `Eres un asistente legal especializado en documentos jurídicos.
+Lee detenidamente el siguiente documento legal y proporciona:
+1. Un resumen BREVE del contenido (máximo 3 párrafos)
+2. Una lista de 5 sugerencias específicas y prácticas para mejorar este documento
+3. Destaca los puntos más problemáticos que deberían corregirse inmediatamente
+
+Formato tu respuesta así:
+
+## RESUMEN
+[Tu resumen aquí]
+
+## SUGERENCIAS DE MEJORA
+1. [Primera sugerencia]
+2. [Segunda sugerencia]
+3. [Tercera sugerencia]
+4. [Cuarta sugerencia]
+5. [Quinta sugerencia]
+
+## PUNTOS CRÍTICOS
+- [Primer punto crítico]
+- [Segundo punto crítico]
+- [Tercer punto crítico]
+
+DOCUMENTO A ANALIZAR:
+${pdfContent}`;
+
+    // Llamada a la API de Ollama para el análisis completo
+    const analysisRes = await fetch(
       `${OLLAMA_BASE_URL}/api/generate`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          model: 'llama3.2:3b', // Puedes ajustar esto para usar tu modelo específico
+          model: 'llama3.2:3b',
           prompt,
           stream: false,
           options: {
@@ -43,28 +88,57 @@ ${pdfContent}`;
       }
     );
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error from Ollama API:", errorText);
+    if (!analysisRes.ok) {
+      const errorText = await analysisRes.text();
+      console.error("Error from Ollama API (analysis):", errorText);
       return NextResponse.json(
-        { error: 'Ollama request failed', details: errorText },
-        { status: res.status }
+        { error: 'Ollama request failed for analysis', details: errorText },
+        { status: analysisRes.status }
       );
     }
 
-    const data = await res.json();
-    const aiResponse = data.response;
+    const analysisData = await analysisRes.json();
+    const aiResponse = analysisData.response;
 
-    // Procesamos la respuesta para extraer las diferentes partes según el formato del modelfile
+    // Llamada a la API de Ollama para el resumen con sugerencias
+    const summaryRes = await fetch(
+      `${OLLAMA_BASE_URL}/api/generate`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          model: 'llama3.2:3b',
+          prompt: summaryPrompt,
+          stream: false,
+          options: {
+            temperature: temperature + 0.1, // Ligeramente más creativo para sugerencias
+            top_p,
+            num_predict: 1024 // Menos tokens para el resumen
+          }
+        }),
+      }
+    );
+
+    let summaryResponse = '';
+    if (summaryRes.ok) {
+      const summaryData = await summaryRes.json();
+      summaryResponse = summaryData.response;
+    } else {
+      console.error("Error from Ollama API (summary):", await summaryRes.text());
+      // Continuamos aunque falle el resumen
+    }
+
+    // Procesamos la respuesta para extraer las diferentes partes según el formato
     const processedResponse = processResponse(aiResponse);
     
     // Generamos una versión "mejorada" del documento
-    const improvedDocument = generateImprovedDocument(pdfContent, processedResponse);
+    const improvedDocument = generateImprovedDocument(pdfContent, processedResponse, summaryResponse);
 
     // Retornamos tanto la respuesta formateada como el documento mejorado
     return NextResponse.json({
       formattedResponse: processedResponse.fullResponse,
-      improvedDocument: improvedDocument
+      improvedDocument: improvedDocument,
+      summary: summaryResponse
     });
 
   } catch (e) {
@@ -78,16 +152,18 @@ ${pdfContent}`;
 
 // Función para procesar la respuesta del modelo según el formato esperado
 function processResponse(response: string) {
-  // Extraemos los componentes según el formato del modelfile
-  const titleMatch = response.match(/Título:\s*(.*?)(?=\n\n|$)/s);
-  const introMatch = response.match(/Introducción:\s*(.*?)(?=\n\n|$)/s);
-  const detailsMatch = response.match(/Detalles:\s*(.*?)(?=\n\n|$)/s);
-  const conclusionMatch = response.match(/Conclusión:\s*(.*?)(?=\n\n|$)/s);
+  // Extraemos los componentes según el formato estructurado del análisis
+  const titleMatch = response.match(/# Análisis del (.*?)(?=\n|$)/);
+  const introMatch = response.match(/## Introducción\s*([\s\S]*?)(?=## Detalles|$)/);
+  const detailsMatch = response.match(/## Detalles\s*([\s\S]*?)(?=## Conclusión|$)/);
+  const conclusionMatch = response.match(/## Conclusión\s*([\s\S]*?)(?=$)/);
 
-  const title = titleMatch ? titleMatch[1].trim() : 'Análisis de Documento';
+  const title = titleMatch ? `Análisis del ${titleMatch[1].trim()}` : 'Análisis de Documento';
   const introduction = introMatch ? introMatch[1].trim() : '';
   const details = detailsMatch ? detailsMatch[1].trim() : '';
   const conclusion = conclusionMatch ? conclusionMatch[1].trim() : '';
+
+  console.log("Procesa la respuesta:", { title, intro: introduction.substring(0, 50), details: details.substring(0, 50) });
 
   // Construimos la respuesta formateada completa
   const fullResponse = `
@@ -113,13 +189,30 @@ ${conclusion}
 }
 
 // Función para generar una versión "mejorada" del documento original
-function generateImprovedDocument(originalContent: string, analysis: any) {
+function generateImprovedDocument(
+  originalContent: string, 
+  analysis: {
+    title: string;
+    introduction: string;
+    details: string;
+    conclusion: string;
+    fullResponse: string;
+  },
+  summaryResponse: string
+) {
   // En una implementación real, se podrían aplicar modificaciones específicas 
   // basadas en el análisis. Por ahora, añadimos comentarios con las sugerencias.
   
   const lines = originalContent.split('\n');
   let improvedDocument = '';
   let currentSection = '';
+
+  // Extraer sugerencias del resumen
+  const suggestionMatch = summaryResponse.match(/## SUGERENCIAS DE MEJORA([\s\S]*?)(?=## PUNTOS CRÍTICOS|$)/);
+  const suggestions = suggestionMatch ? suggestionMatch[1].trim() : '';
+  
+  const criticalPointsMatch = summaryResponse.match(/## PUNTOS CRÍTICOS([\s\S]*?)(?=$)/);
+  const criticalPoints = criticalPointsMatch ? criticalPointsMatch[1].trim() : '';
 
   // Identificamos secciones comunes en documentos legales
   const sections = [
@@ -150,7 +243,13 @@ function generateImprovedDocument(originalContent: string, analysis: any) {
     // Añadimos sugerencias en puntos específicos
     if (currentSection === 'CLÁUSULAS' && line.includes('CLÁUSULAS') && !lines[i-1].includes('SUGERENCIAS')) {
       improvedDocument += '\n/* SUGERENCIAS DE MEJORA:\n';
-      improvedDocument += `${analysis.introduction}\n*/\n\n`;
+      // Usamos las sugerencias específicas si están disponibles
+      if (suggestions) {
+        improvedDocument += `${suggestions}\n`;
+      } else {
+        improvedDocument += `${analysis.introduction}\n`;
+      }
+      improvedDocument += '*/\n\n';
     }
     else if (currentSection === 'RESOLUCIÓN' && line.includes('RESOLUCIÓN') && !lines[i-1].includes('ALERTA')) {
       improvedDocument += '\n/* ALERTA - POSIBLE CLÁUSULA ABUSIVA:\n';
@@ -165,6 +264,12 @@ function generateImprovedDocument(originalContent: string, analysis: any) {
 
   // Añadimos un resumen de mejoras al final
   improvedDocument += '\n\n/* RESUMEN DE MEJORAS SUGERIDAS:\n';
+  
+  // Usamos los puntos críticos específicos si están disponibles
+  if (criticalPoints) {
+    improvedDocument += `PUNTOS CRÍTICOS QUE REQUIEREN ATENCIÓN INMEDIATA:\n${criticalPoints}\n\n`;
+  }
+  
   improvedDocument += `${analysis.conclusion}\n*/\n`;
 
   return improvedDocument;

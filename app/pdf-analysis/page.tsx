@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { PDFChat } from "@/components/pdf-chat-fixed";
+import { PDFChat } from "@/components/pdf-chat";
 import { Settings, BookOpen, FileText } from "lucide-react";
 import { Hyperparameters } from "@/components/ui/hyperparameter-form";
 
