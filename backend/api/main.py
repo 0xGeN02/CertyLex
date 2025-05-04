@@ -28,11 +28,13 @@ app.add_middleware(
 from backend.api.routers.entities.route import entity_router
 from backend.api.routers.nlp_entities.route import nlp_entity_router
 from backend.api.routers.image.route import image_router
+from backend.api.routers.imagecnn.route import imagecnn_router
 
 # Incluir routers en la aplicación
 app.include_router(entity_router, prefix="/api")
 app.include_router(nlp_entity_router, prefix="/api")
 app.include_router(image_router, prefix="/api")
+app.include_router(imagecnn_router, prefix="/api")
 
 # Rutas básicas
 API_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
