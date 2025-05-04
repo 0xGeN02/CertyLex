@@ -17,8 +17,10 @@ export async function POST(request: Request) {
     );
 
     if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error from Ollama API:", errorText);
       return NextResponse.json(
-        { error: 'Ollama chat request failed' },
+        { error: 'Ollama chat request failed', details: errorText },
         { status: res.status }
       );
     }

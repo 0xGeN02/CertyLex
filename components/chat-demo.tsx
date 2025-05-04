@@ -55,6 +55,11 @@ export function ChatDemo(props: ChatDemoProps) {
     // Append the user's message to the chat
     append({ role: "user", content: input });
 
+    console.log("Sending request with data:", {
+      model: selectedModel,
+      messages: [...messages, { role: "user", content: input }],
+    });
+
     fetch("/api/chat/ollama", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
