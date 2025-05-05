@@ -1,0 +1,23 @@
+```
+flowchart TD
+    A[User Input]
+    B[Document Ingestion]
+    C[Preprocessing]
+    D[Model Selection]
+    E1[DeepSeek-R1:32B]
+    E2[DeepSeek-R1:8B]
+    E3[LLaMA 3.2:3B]
+    E4[LLaMA 3.2-Vision:11B]
+    F[Postprocessing]
+    G[Output Delivery]
+
+    A --> B --> C --> D
+    D --> E1
+    D --> E2
+    D --> E3
+    D --> E4
+    E1 --> F
+    E2 --> F
+    E3 --> F
+    E4 --> F --> G
+```
